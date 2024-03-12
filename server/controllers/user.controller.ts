@@ -6,6 +6,7 @@ import { createActivationToken } from '../utils/tokens';
 import path from 'path';
 import sendMail from '../utils/sendMail';
 import { sendToken } from '../utils/jwt';
+import { redis } from '../utils/redis';
 
 
 interface IRegistrationBody {
@@ -89,16 +90,12 @@ export const loginUser = CatchAsyncError(async (req: Request, res: Response, nex
 
 export const logOutUser = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const accessToken = req.cookies.access_token;
-    const refreshToken = req.cookies.refresh_token;
-
-    // Blacklist tokens
-    // redis.sadd('blacklist:access_tokens', accessToken);
-    // redis.sadd('blacklist:refresh_tokens', refreshToken);
-
     // Clear cookies
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
+
+    const userId = req?.user?._id || "";
+    redis.del(userId);
 
     res.status(200).json({
       success: true,
