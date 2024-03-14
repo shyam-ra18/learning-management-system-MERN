@@ -39,7 +39,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, "Please enter your password"],
+        // required: [true, "Please enter your password"],
         minlength: [6, "Password must be at least 8 characters"],
         select: false
     },
@@ -72,12 +72,16 @@ userSchema.pre<IUser>('save', async function (next) {
 
 //sign access token
 userSchema.methods.signAccessToken = function () {
-    return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN_SECRET || '');
+    return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN_SECRET || '', {
+        expiresIn: '10m',
+    });
 }
 
 //sign refresh token
 userSchema.methods.signRefreshToken = function () {
-    return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN_SECRET || '');
+    return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN_SECRET || '', {
+        expiresIn: "7d",
+    });
 }
 
 // ComparePassword method for IUser
